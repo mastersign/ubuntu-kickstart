@@ -1,0 +1,10 @@
+@ ubuntu-server
+open-vm-tools
+ufw
+openssh-server
+aptitude
+htop
+nano
+prometheus-node-exporter
+ssmtp
+mailutils

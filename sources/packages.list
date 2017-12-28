@@ -3,6 +3,8 @@ open-vm-tools
 ufw
 openssh-server
 aptitude
+unattended-upgrades
+apt-listchanges
 htop
 nano
 prometheus-node-exporter

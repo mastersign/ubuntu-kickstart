@@ -177,8 +177,10 @@ It is configuring the system to deliver mails (e.g. from a cron job) via an arbi
   A user name to authenticate to the SMTP server.
 * `ssmtp_auth_pass`  (_mailpassword_)  
   A password to authenticate to the SMTP server.
-* `ssmtp_use_startssl` (_YES_)  
-  A switch to indicate if STARTSSL must be used with the SMTP server.
+* `ssmtp_use_tls` (_YES_)  
+  A switch to indicate if the connection to the SMTP server is encrypted with TLS.
+* `ssmtp_use_starttls` (_YES_)  
+  A switch to indicate if STARTTLS must be used with the SMTP server.
 * `ssmtp_from_line_override` (_NO_)  
   A switch to indicate if the FROM line in the mail should be overridden by a custom address.
 * `ssmtp_from_address` (_admin@your-domain_)  

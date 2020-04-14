@@ -6,5 +6,6 @@ ssh-key
 sudo-without-passwd
 keyboard-layout
 
-webmin
 ssmtp
+webmin
+docker

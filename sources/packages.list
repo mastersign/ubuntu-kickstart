@@ -4,7 +4,11 @@ ufw
 openssh-server
 aptitude
 unattended-upgrades
+apt-transport-https
+ca-certificates
+software-properties-common
 apt-listchanges
+curl
 htop
 nano
 prometheus-node-exporter

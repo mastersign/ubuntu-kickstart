@@ -1,12 +1,29 @@
 #!/bin/bash
 
-version="1.0"
+version="1.1"
 
 # Needs to be run with root previledges because
 # of the loop driver for writing the output ISO image.
 if [[ $EUID != 0 ]]; then
 	sudo "$0" "$@"
-	exit $?
+ 	exit $?
+fi
+
+# check for dependencies
+if ! [ -x "$(command -v wget)" ]; then
+	echo "This command requires wget to download the ISO image."
+	echo "Setup: sudo apt-get install wget"
+	exit 1
+fi
+# if ! [ -x "$(command -v 7z)" ]; then
+# 	echo "This command requires 7-Zip to extrac the ISO image."
+# 	echo "Setup: sudo apt-get install p7zip-full p7zip-rar"
+# 	exit 1
+# fi
+if ! [ -x "$(command -v genisoimage)" ]; then
+	echo "This command requires genisoimage to create a bootable ISO image."
+	echo "Setup: sudo apt-get install genisoimage"
+	exit 1
 fi
 
 # =============================================================================
@@ -22,7 +39,7 @@ dry_run=0                                                      # t, T
 
 def_config_file="$DIR/sources/default_config.ini"
 param_names=( \
-	ubuntu_version result_iso_file \
+	ubuntu_version ubuntu_edition result_iso_file \
 	host_name user_name user_fullname user_passwd authorized_keys_file \
 	packages_file post_mods_file pre_script_file post_script_file
 	timezone default_locale keyboard
@@ -236,8 +253,9 @@ fi
 if [[ ! -d "$DIR/out" ]]; then
 	mkdir -m 0777 "$DIR/out"
 fi
-iso_file="$cache_dir/ubuntu-$ubuntu_version-server-amd64.iso"
-image_dir="$cache_dir/ubuntu-$ubuntu_version-server-amd64"
+iso_url="http://releases.ubuntu.com/$ubuntu_version/ubuntu-$ubuntu_version-$ubuntu_edition.iso"
+iso_file="$cache_dir/ubuntu-$ubuntu_version-$ubuntu_edition.iso"
+image_dir="$cache_dir/ubuntu-$ubuntu_version-$ubuntu_edition"
 tmp_dir="$DIR/tmp"
 
 if [[ -d "$tmp_dir" ]]; then
@@ -247,13 +265,17 @@ if [[ -d "$tmp_dir" ]]; then
 fi
 
 if [[ ! -f "$iso_file" ]]; then
-	echo "Downloading Ubuntu $ubuntu_version Server installer ISO..."
-	iso_url="http://releases.ubuntu.com/$ubuntu_version/ubuntu-$ubuntu_version-server-amd64.iso"
+	echo "Downloading Ubuntu $ubuntu_version $ubuntu_edition installer ISO..."
 	wget -O "$iso_file" "$iso_url"
+	if [ $? -ne 0 ]; then
+		echo "Downloading the ISO file failed."
+		if [ -f "$iso_file" ]; then rm "$iso_file"; fi
+		exit 1
+	fi
 	chmod 0666 "$iso_file"
 fi
 
-echo "Ubuntu $ubuntu_server Server installer image ready."
+echo "Ubuntu $ubuntu_version $ubuntu_edition installer image ready."
 
 if [[ ! -d "$image_dir" ]]; then
 	echo "Extracting ISO file..."
@@ -263,9 +285,16 @@ if [[ ! -d "$image_dir" ]]; then
 	rsync -a -H --exclude=TRANS.TBL "$tmp_dir/" "$image_dir"
 	umount "$tmp_dir"
 	rm -rf "$tmp_dir/"
+	# 7z x "$iso_file" -o"$image_dir"
+	# if [ $? -ne 0 ]; then
+	# 	echo "Extracting the ISO file failed."
+	# 	rm -rf "$image_dir"
+	# 	exit 1
+	# fi
+	# if [ -d "$image_dir/[BOOT]" ]; then rm -rf "$image_dir/[BOOT]"; fi
 fi
 
-echo "Ubuntu $ubuntu_version Server installer image extracted."
+echo "Ubuntu $ubuntu_version $ubuntu_edition installer image extracted."
 
 # EXIT IF VERY DRY RUN
 
@@ -394,10 +423,23 @@ echo "- Configure installer arguments"
 echo 'default install
 label install
 	menu label ^Unattended Install
-	menu default
-	kernel /install/vmlinuz
-	append file=/cdrom/preseed/ubuntu-server.seed vga=788 initrd=/install/initrd.gz ks=cdrom:/ks.cfg ---' \
+	menu default' \
 	> "$image_dir/isolinux/txt.cfg"
+if [ -f "$image_dir/install/vmlinuz" ]; then
+	echo 'kernel /install/vmlinuz' >> "$image_dir/isolinux/txt.cfg"
+	echo 'append file=/cdrom/preseed/ubuntu-server.seed vga=788 initrd=/install/initrd.gz ks=cdrom:/ks.cfg ---' \
+		>> "$image_dir/isolinux/txt.cfg"
+elif [ -f "$image_dir/casper/vmlinuz" ]; then
+	echo 'kernel /casper/vmlinuz' >> "$image_dir/isolinux/txt.cfg"
+	echo 'append file=/cdrom/preseed/ubuntu-server-minimalvm.seed vga=788 initrd=/casper/initrd ks=cdrom:/ks.cfg ---' \
+		>> "$image_dir/isolinux/txt.cfg"
+else
+	echo "Can not find the Linux kernel in the image."
+	echo "Searching for:"
+	echo "    /install/vmlinuz"
+	echo "    /casper/vmlinuz"
+	exit 1
+fi
 
 echo "- Activate automatic installer start"
 sed -i 's/timeout [0-9]*/timeout 10/' $image_dir/isolinux/isolinux.cfg

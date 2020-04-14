@@ -4,12 +4,22 @@ Ubuntu Kickstarter
 > This project contains a shell script for creating an ISO image
 > for the unattended installation of Ubuntu Linux.
 
+Dependencies
+------------
+
+* wget
+* genisoimage
+
+```sh
+sudo apt-get install wget genisoimage
+```
+
 Usage
 -----
 
 The main script is: `prepare-server-image.sh`
 
-It makes use of the loop driver for ISO file systems with `mount`
+**Warning:** It makes use of the loop driver for ISO file systems with `mount`
 to extract the files from the downloaded installer ISO file.
 Therefore, it must be run with root privileges.
 
@@ -43,10 +53,10 @@ You have multiple points to parameterize the unattended installation:
   with the command line options `-b <path>` and `-a <path>`.
 
 CLI Reference
----------
+-------------
 
 ```
-Ubuntu Kickstart Generator v1.0
+Ubuntu Kickstart Generator v1.1
 -------------------------------
 
 Usage: prepare-server-image.sh [FLAGS] [OPTIONS]

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="1.1"
+version="1.2"
 
 # Needs to be run with root previledges because
 # of the loop driver for writing the output ISO image.

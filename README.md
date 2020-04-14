@@ -56,7 +56,7 @@ CLI Reference
 -------------
 
 ```
-Ubuntu Kickstart Generator v1.1
+Ubuntu Kickstart Generator v1.2
 -------------------------------
 
 Usage: prepare-server-image.sh [FLAGS] [OPTIONS]

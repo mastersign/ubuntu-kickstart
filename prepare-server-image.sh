@@ -253,7 +253,11 @@ fi
 if [[ ! -d "$DIR/out" ]]; then
 	mkdir -m 0777 "$DIR/out"
 fi
-iso_url="http://releases.ubuntu.com/$ubuntu_version/ubuntu-$ubuntu_version-$ubuntu_edition.iso"
+if [[ $ubuntu_version == '16.04.6' ]]; then
+	iso_url="http://releases.ubuntu.com/xenial/ubuntu-16.04.6-$ubuntu_edition.iso"
+else
+	iso_url="http://cdimage.ubuntu.com/releases/$ubuntu_version/release/ubuntu-$ubuntu_version-$ubuntu_edition.iso"
+fi
 iso_file="$cache_dir/ubuntu-$ubuntu_version-$ubuntu_edition.iso"
 image_dir="$cache_dir/ubuntu-$ubuntu_version-$ubuntu_edition"
 tmp_dir="$DIR/tmp"
